@@ -2,14 +2,14 @@ import pandas as pd
 import numpy as np
 
 # Load CSV file into a pandas DataFrame
-df = pd.read_csv("fly_loc.csv")
+df = pd.read_csv("gabi/fly_loc.csv")
 
 # Create a dataframe with only experiment_step and chamber_x_loc columns (x = 1 to 20)
 columns_to_select = ['experiment_step'] + [f'chamber_{i}_loc' for i in range(1, 21)]
 df = df[columns_to_select]
 
 
-def filter_moving_flies(df, threshold_X=60, min_crossings_Y=10):
+def filter_moving_flies(df, threshold_X=60, min_crossings_Y=1):
     """
     Filter out flies that haven't moved enough.
     
@@ -61,16 +61,16 @@ odor_left_df_after_shock = df[df['experiment_step'] == 'Valence After Shock Odor
 
 # Filter each experiment step separately
 print("Filtering each experiment step...")
-valid_chambers_before_right = filter_moving_flies(odor_right_df_before_shock, threshold_X=60, min_crossings_Y=1)
+valid_chambers_before_right = filter_moving_flies(odor_right_df_before_shock, threshold_X=30, min_crossings_Y=1)
 print(f"  Before Shock Odor Right: {len(valid_chambers_before_right)} out of 20 chambers passed")
 
-valid_chambers_before_left = filter_moving_flies(odor_left_df_before_shock, threshold_X=60, min_crossings_Y=1)
+valid_chambers_before_left = filter_moving_flies(odor_left_df_before_shock, threshold_X=30, min_crossings_Y=1)
 print(f"  Before Shock Odor Left: {len(valid_chambers_before_left)} out of 20 chambers passed")
 
-valid_chambers_after_right = filter_moving_flies(odor_right_df_after_shock, threshold_X=60, min_crossings_Y=1)
+valid_chambers_after_right = filter_moving_flies(odor_right_df_after_shock, threshold_X=30, min_crossings_Y=1)
 print(f"  After Shock Odor Right: {len(valid_chambers_after_right)} out of 20 chambers passed")
 
-valid_chambers_after_left = filter_moving_flies(odor_left_df_after_shock, threshold_X=60, min_crossings_Y=1)
+valid_chambers_after_left = filter_moving_flies(odor_left_df_after_shock, threshold_X=30, min_crossings_Y=1)
 print(f"  After Shock Odor Left: {len(valid_chambers_after_left)} out of 20 chambers passed")
 
 # Find union of before pair (OR logic): chambers that passed at least one "before" step
@@ -97,10 +97,10 @@ for col in valid_chambers_all:
     chamber_num = int(col.split('_')[1])
     chamber_numbers.append(chamber_num)
     # Calculate ratio for odor_right_df: number of rows where value < 0 / total rows
-    odor_right_ratio_before_shock = (odor_right_df_before_shock[col] < 0).sum() / len(odor_right_df_before_shock)
-    odor_left_ratio_before_shock = (odor_left_df_before_shock[col] < 0).sum() / len(odor_left_df_before_shock)
-    odor_right_ratio_after_shock = (odor_right_df_after_shock[col] < 0).sum() / len(odor_right_df_after_shock)
-    odor_left_ratio_after_shock = (odor_left_df_after_shock[col] < 0).sum() / len(odor_left_df_after_shock)
+    odor_right_ratio_before_shock = (odor_right_df_before_shock[col] > 0).sum() / len(odor_right_df_before_shock)
+    odor_left_ratio_before_shock = (odor_left_df_before_shock[col] > 0).sum() / len(odor_left_df_before_shock)
+    odor_right_ratio_after_shock = (odor_right_df_after_shock[col] > 0).sum() / len(odor_right_df_after_shock)
+    odor_left_ratio_after_shock = (odor_left_df_after_shock[col] > 0).sum() / len(odor_left_df_after_shock)
     # Calculate valence: subtract odor_left from odor_right and multiply by 100
     before = (odor_right_ratio_before_shock - odor_left_ratio_before_shock) * 100
     after = (odor_right_ratio_after_shock - odor_left_ratio_after_shock) * 100
