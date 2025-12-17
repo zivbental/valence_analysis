@@ -174,14 +174,22 @@ def epoch_analysis_visualization(df, speed_df):
         # Calculate overall mean and SEM across chambers
         if len(chamber_location_means) > 0:
             location_mean = np.mean(chamber_location_means)
-            location_sem = np.std(chamber_location_means, ddof=1) / np.sqrt(len(chamber_location_means))
+            # Handle case when only 1 chamber: can't calculate SEM with ddof=1, set to 0 or nan
+            if len(chamber_location_means) == 1:
+                location_sem = 0.0  # No variance with single sample
+            else:
+                location_sem = np.std(chamber_location_means, ddof=1) / np.sqrt(len(chamber_location_means))
         else:
             location_mean = np.nan
             location_sem = np.nan
         
         if len(chamber_speed_means) > 0:
             speed_mean = np.mean(chamber_speed_means)
-            speed_sem = np.std(chamber_speed_means, ddof=1) / np.sqrt(len(chamber_speed_means))
+            # Handle case when only 1 chamber: can't calculate SEM with ddof=1, set to 0 or nan
+            if len(chamber_speed_means) == 1:
+                speed_sem = 0.0  # No variance with single sample
+            else:
+                speed_sem = np.std(chamber_speed_means, ddof=1) / np.sqrt(len(chamber_speed_means))
         else:
             speed_mean = np.nan
             speed_sem = np.nan
@@ -266,7 +274,7 @@ def epoch_analysis_visualization(df, speed_df):
 
 
 # Read CSV file as input
-df = pd.read_csv(r"D:\multiplex\system_check\w1118_classical\11.12.2025\trial_2\fly_loc.csv")
+df = pd.read_csv("fly_loc.csv")
 
 # Create a dataframe with only experiment_step and chamber_x_loc columns (x = 1 to 20)
 columns_to_select = ['experiment_step'] + [f'chamber_{i}_loc' for i in range(1, 21)]
