@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 # Load CSV file into a pandas DataFrame
-df = pd.read_csv("gabi/fly_loc.csv")
+df = pd.read_csv("fly_loc.csv")
 
 # Create a dataframe with only experiment_step and chamber_x_loc columns (x = 1 to 20)
 columns_to_select = ['experiment_step'] + [f'chamber_{i}_loc' for i in range(1, 21)]
