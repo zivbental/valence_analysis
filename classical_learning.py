@@ -53,7 +53,7 @@ def filter_moving_flies(df, decision_point, min_decisions_filter):
     return valid_chambers
 
 
-def calculate_learning(df, decision_side, cs_plus_side, valid_chambers):
+def calculate_preference(df, decision_side, cs_plus_side, valid_chambers):
     """
     Perform calculation on the dataframe for valid chambers.
     
@@ -78,7 +78,7 @@ def calculate_learning(df, decision_side, cs_plus_side, valid_chambers):
         # Calculate fraction: number of rows where value < or > decision_side / total rows
         total_rows = len(df[col].dropna())
         if cs_plus_side == "left":
-            rows_below = (df[col] < decision_side).sum()
+            rows_below = (df[col] < -decision_side).sum()
         elif cs_plus_side == "right":
             rows_below = (df[col] > decision_side).sum()
         fraction = rows_below / total_rows if total_rows > 0 else 0
@@ -93,11 +93,11 @@ def calculate_learning(df, decision_side, cs_plus_side, valid_chambers):
     return result_df
 
 # Load CSV file from classical/fly_loc.csv into a pandas DataFrame
-df = pd.read_csv(r"D:\multiplex\system_check\w1118_classical\11.12.2025\trial_7\fly_loc.csv")
+df = pd.read_csv(r"D:\multiplex\system_check\classical_2x\31.12.2025\trial_3\fly_loc.csv")
 
 # Create two dataframes based on experiment_step
 initial_df = df[df['experiment_step'] == 'Initial Valence']
-test_df = df[df['experiment_step'] == 'Test']
+test_df = df[df['experiment_step'] == 'Test'] 
 
 # Apply filter function to both dataframes separately
 initial_valid_chambers = filter_moving_flies(initial_df, decision_point=30, min_decisions_filter=1)
@@ -107,12 +107,12 @@ test_valid_chambers = filter_moving_flies(test_df, decision_point=30, min_decisi
 valid_chambers_intersection = set(initial_valid_chambers) & set(test_valid_chambers)
 valid_chambers_intersection = sorted(list(valid_chambers_intersection))
 
-# Apply calculate_learning function to both dataframes using only the intersection of valid chambers
-initial_result = calculate_learning(initial_df, decision_side=30, cs_plus_side="left", valid_chambers=valid_chambers_intersection)
-test_result = calculate_learning(test_df, decision_side=30, cs_plus_side="right", valid_chambers=valid_chambers_intersection)
+# Apply calculate_preference function to both dataframes using only the intersection of valid chambers
+initial_preference = calculate_preference(initial_df, decision_side=30, cs_plus_side="right", valid_chambers=valid_chambers_intersection)
+test_preference = calculate_preference(test_df, decision_side=30, cs_plus_side="left", valid_chambers=valid_chambers_intersection)
 
 # Merge the results and calculate difference
-learning_df = pd.merge(initial_result, test_result, on='chamber', suffixes=('_initial', '_test'))
+learning_df = pd.merge(initial_preference, test_preference, on='chamber', suffixes=('_initial', '_test'))
 learning_df['difference'] = learning_df['fraction_test'] - learning_df['fraction_initial']
 learning_df = learning_df.rename(columns={'fraction_initial': 'initial_fraction', 'fraction_test': 'test_fraction'})
 
